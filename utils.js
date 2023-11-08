@@ -1,21 +1,39 @@
 const chatGPT = require('axios.conf.js')
-const personaPath = "./media/personas.json"
-const system_promt = "You are Ava a girlfriend"
+const fs = require('fs')
 
-const getChatCompletion = async (messages) => {
-	return await chatGPT.post("/completions", {
+const addUserMessage = (userID, personaID, chatText) => {
+	const users = JSON.parse(fs.readFileSync("users.json", 'utf8'));
+	const userDoc = users.find((user)=> user.id == userID)
+	const messages = userDoc['personas'].find((persona) => persona._id == personaID)['messages']
+	const lastMessageIsUserMessage = messages[-1]['isUser']
+
+	if (!lastMessageIsUserMessage) {
+		throw new Error("Not implemented. Cannot push two connsecutive user messages.")
+	}
+	new_message = {
+		"content": chatText,
+		"isUser": true,
+	}
+	updated_messaged = messages.push(new_message)
+	userDoc['personas'].find((persona) => persona._id == personaID)['messages'] = updated_messaged
+	fs.writeFile(JSON.stringify(userDoc), 'utf8');
+	return true
+}
+
+const messageObjToGPTFormat = (messages)=> {
+	return messages.map((message)=> {return {"role": message.isUser?"user":"assist", "content":message.content}})
+}
+
+const fetchGPTMessage = async (userID, personaID) => {
+	const users = JSON.parse(fs.readFileSync("users.json", 'utf8'));
+	const userDoc = users.find((user)=> user.id == userID)
+	const messages = userDoc['personas'].find((persona) => persona._id == personaID)['messages']
+	const response = await chatGPT.post("/completions", {
 		"model": process.env.GPT_MODEL,
-		"messages": messages,
-		"temperature": 1
+		"messages": messageObjToGPTFormat(messages),
+		"temperature": Integer.parseInt((process.env.GPT_TEMPERATURE))
 	})
+	return response['choices']['message']['content']
 }
 
-const getPersona = (personaID, personaName)=>{
-	const data = fs.readFileSync(personaPath, 'utf8');
-    const allPersonas = JSON.parse(data);
-	const persona = allPersonas.find((persona)=>persona._id==personaID && persona.name==personaName)
-	return persona
-}
-
-
-
+module.exports = chatGPT
