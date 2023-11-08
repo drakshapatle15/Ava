@@ -212,49 +212,52 @@
 
 const express = require("express");
 const cors = require("cors");
+
+const dotenv = require('dotenv')
+dotenv.config()
+
 // const User = require("./config");
 const app = express();
 app.use(express.json());
 app.use(cors());
 
 const firebase = require("firebase");
-
 const firebaseConfig = {
-  apiKey: "AIzaSyBDuYuSkH1-b8JImUsmRT5URK3wJSuIxMk",
-  authDomain: "avachatapp-ac130.firebaseapp.com",
-  projectId: "avachatapp-ac130",
-  storageBucket: "avachatapp-ac130.appspot.com",
-  messagingSenderId: "136702132969",
-  appId: "1:136702132969:web:dd0369bb5161156b7ca678",
-  measurementId: "G-Y9F6ZWHR2N",
+	apiKey: "AIzaSyBDuYuSkH1-b8JImUsmRT5URK3wJSuIxMk",
+	authDomain: "avachatapp-ac130.firebaseapp.com",
+	projectId: "avachatapp-ac130",
+	storageBucket: "avachatapp-ac130.appspot.com",
+	messagingSenderId: "136702132969",
+	appId: "1:136702132969:web:dd0369bb5161156b7ca678",
+	measurementId: "G-Y9F6ZWHR2N",
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const User = db.collection("Users");
 
 app.get("/", async (req, res) => {
-  const snapshot = await User.get();
-  const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  res.send(list);
+	const snapshot = await User.get();
+	const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+	res.send(list);
 });
 
 app.post("/create", async (req, res) => {
-  const data = req.body;
-  await User.add({ data });
-  res.send({ msg: "User Added" });
+	const data = req.body;
+	await User.add({ data });
+	res.send({ msg: "User Added" });
 });
 
 app.post("/update", async (req, res) => {
-  const id = req.body.id;
-  delete req.body.id;
-  const data = req.body;
-  await User.doc(id).update(data);
-  res.send({ msg: "Updated" });
+	const id = req.body.id;
+	delete req.body.id;
+	const data = req.body;
+	await User.doc(id).update(data);
+	res.send({ msg: "Updated" });
 });
 
 app.post("/delete", async (req, res) => {
-  const id = req.body.id;
-  await User.doc(id).delete();
-  res.send({ msg: "Deleted" });
+	const id = req.body.id;
+	await User.doc(id).delete();
+	res.send({ msg: "Deleted" });
 });
 app.listen(5000, () => console.log("Up & RUnning *5000"));
