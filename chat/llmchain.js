@@ -1,13 +1,14 @@
 const { ChatOpenAI } = require("langchain/chat_models/openai");
 const { BufferMemory } = require("langchain/memory");
 const { ConversationChain } = require("langchain/chains");
+const { ChatPromptTemplate, MessagesPlaceholder } = require("langchain/prompts");
 
 const dotenv = require('dotenv')
 dotenv.config()
 
 const model = new ChatOpenAI({
-    openAIApiKey: "YOUR_KEY_HERE",
-    temperature: process.env.GPT_TEMPERATURE,
+    openAIApiKey: process.env.OPENAI_APIKEY,
+    temperature: parseInt(process.env.GPT_TEMPERATURE),
     model: process.env.GPT_MODEL,
 })
 
@@ -24,6 +25,8 @@ const chatPrompt = ChatPromptTemplate.fromMessages([
     ["human", "{input}"],
 ]);
 
+
+
 const chain = new ConversationChain({ llm: model, prompt: chatPrompt, memory: memory });
 
-module.exports = {chain}
+module.exports = {chain, model}
